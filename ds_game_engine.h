@@ -1,17 +1,21 @@
 #ifndef DS_GAME_ENGINE_INCL
 #define DS_GAME_ENGINE_INCL
 
-#define SCREEN_WIDTH 256
-#define SCREEN_HEIGHT 192
-
-#define BLACK 0
-#define WHITE 65535
-#define BLUE 0xFC00
-#define SKYBLUE 0xEEEF
-#define MAGENTA 0xFC1F
-#define CYAN 0xFFE0
+#define WHITE 0xFFFF
+#define BLACK 0x0000
+#define SKY 0xEEEF
 
 #include <nds.h>
+
+/*
+int round(float f){
+	float decpt = f - (int)f;
+	if(decpt < 0.5f){
+		return (int)f;
+	}else{
+		return (int)f+1;
+	}
+}*/
 
 short screenbuffer_maindisplay[49152];
 short screen_width = 256;
@@ -62,6 +66,157 @@ void fill_rectangle(short colour, int w, int h, int dx, int dy){
 	}
 }
 
+void plot_pixel (int x, int y, short colour){
+	
+			if((x) >= 0 && (x) < 256 && (y) >= 0 && (y) < 192){
+				screenbuffer_maindisplay[y*screen_width+x] = colour;
+			}
+}
+
+void draw_line (int x1, int y1, int x2, int y2, short col){
+	int x, y, dx, dy, dx1, dy1, px, py, xe, ye, i;
+		dx = x2 - x1; dy = y2 - y1;
+		dx1 = abs(dx); dy1 = abs(dy);
+		px = 2 * dy1 - dx1;	py = 2 * dx1 - dy1;
+		if (dy1 <= dx1)
+		{
+			if (dx >= 0)
+				{ x = x1; y = y1; xe = x2; }
+			else
+				{ x = x2; y = y2; xe = x1;}
+
+			plot_pixel(x, y, col);
+			
+			for (i = 0; x<xe; i++)
+			{
+				x = x + 1;
+				if (px<0)
+					px = px + 2 * dy1;
+				else
+				{
+					if ((dx<0 && dy<0) || (dx>0 && dy>0)) y = y + 1; else y = y - 1;
+					px = px + 2 * (dy1 - dx1);
+				}
+				plot_pixel(x, y, col);
+			}
+		}
+		else
+		{
+			if (dy >= 0)
+				{ x = x1; y = y1; ye = y2; }
+			else
+				{ x = x2; y = y2; ye = y1; }
+
+			plot_pixel(x, y, col);
+
+			for (i = 0; y<ye; i++)
+			{
+				y = y + 1;
+				if (py <= 0)
+					py = py + 2 * dx1;
+				else
+				{
+					if ((dx<0 && dy<0) || (dx>0 && dy>0)) x = x + 1; else x = x - 1;
+					py = py + 2 * (dx1 - dy1);
+				}
+				plot_pixel(x, y, col);
+			}
+		}
+}
+
+void draw_triangle (int x1, int y1, int x2, int y2, int x3, int y3, short colour){
+	draw_line (x1, y1, x2, y2, colour);
+	draw_line (x1, y1, x3, y3, colour);
+	draw_line (x3, y3, x2, y2, colour);
+}
+
+void fill_triangle (int x1, int y1, int x2, int y2, int x3, int y3, short col){
+	int x, y, dx, dy, dx1, dy1, px, py, xe, ye, i;
+		dx = x2 - x1; dy = y2 - y1;
+		dx1 = abs(dx); dy1 = abs(dy);
+		px = 2 * dy1 - dx1;	py = 2 * dx1 - dy1;
+		if (dy1 <= dx1)
+		{
+			if (dx >= 0)
+				{ x = x1; y = y1; xe = x2; }
+			else
+				{ x = x2; y = y2; xe = x1;}
+
+			plot_pixel(x, y, col);
+			draw_line(x, y, x3, y3, col);
+			
+			for (i = 0; x<xe; i++)
+			{
+				x = x + 1;
+				if (px<0)
+					px = px + 2 * dy1;
+				else
+				{
+					if ((dx<0 && dy<0) || (dx>0 && dy>0)) y = y + 1; else y = y - 1;
+					px = px + 2 * (dy1 - dx1);
+				}
+				plot_pixel(x, y, col);
+			draw_line(x, y, x3, y3, col);
+			}
+		}
+		else
+		{
+			if (dy >= 0)
+				{ x = x1; y = y1; ye = y2; }
+			else
+				{ x = x2; y = y2; ye = y1; }
+
+			plot_pixel(x, y, col);
+			draw_line(x, y, x3, y3, col);
+
+			for (i = 0; y<ye; i++)
+			{
+				y = y + 1;
+				if (py <= 0)
+					py = py + 2 * dx1;
+				else
+				{
+					if ((dx<0 && dy<0) || (dx>0 && dy>0)) x = x + 1; else x = x - 1;
+					py = py + 2 * (dx1 - dy1);
+				}
+				plot_pixel(x, y, col);
+				draw_line(x, y, x3, y3, col);
+			}
+		}
+}
+
+void draw_image_sizable(short* image, int w, int h, int dx, int dy, int dw, int dh){
+	/*float pixel_width = dw / w;
+	float pixel_height= dh / h;
+	
+	for(int y = 0; y < dh; y++){
+		for(int x = 0; x < dw; x++){
+			if((x+dx) >= 0 && (x+dx) < 256 && (y+dy) >= 0 && (y+dy) < 192){
+				int src_y = round(y * pixel_height);
+				int src_x = round(x * pixel_width);
+				screenbuffer_maindisplay[(dy+y)*screen_width+(x+dx)] = image[(src_y*w+src_x)];
+			}
+		}
+	}*/
+	
+	int w2 = dw, w1 = w, h2 = dh, h1 = h;
+	
+    // EDIT: added +1 to account for an early rounding problem
+    int x_ratio = (int)((w1<<16)/w2) +1;
+    int y_ratio = (int)((h1<<16)/h2) +1;
+	
+    int x2, y2 ;
+    for (int i=0;i<h2;i++) {
+        for (int j=0;j<w2;j++) {
+            x2 = ((j*x_ratio)>>16) ;
+            y2 = ((i*y_ratio)>>16) ;
+			if((j+dx) >= 0 && (j+dx) < 256 && (i+dy) >= 0 && (i+dy) < 192){
+				screenbuffer_maindisplay[(i+dy)*screen_width+(j+dx)] = image[(y2*w1)+x2] ;
+			}
+        }                
+    }            
+}
+
 void draw_image(short* image, int w, int h, int dx, int dy){
 	for(int y = 0; y < h; y++){
 		for(int x = 0; x < w; x++){
@@ -71,6 +226,17 @@ void draw_image(short* image, int w, int h, int dx, int dy){
 		}
 	}
 }
+
+void draw_image_wsr(short* image, int w, int h, int dx, int dy, int sx, int sy){
+	for(int y = 0; y < h; y++){
+		for(int x = 0; x < w; x++){
+			if((x+dx) >= 0 && (x+dx) < 256 && (y+dy) >= 0 && (y+dy) < 192){
+				if(image[(sy+y)*w+(sx+x)] == -993){}else{screenbuffer_maindisplay[(dy+y)*screen_width+(x+dx)] = image[(sy+y)*w+(sx+x)];}
+			}
+		}
+	}
+}
+
 void draw_image_flipped_v(short* image, int w, int h, int dx, int dy){
 	for(int y = 0; y < h; y++){
 		for(int x = 0; x < w; x++){
@@ -98,6 +264,12 @@ void draw_image_flipped_h(short* image, int w, int h, int dx, int dy){
 		}
 	}
 }
+
+void OnUserCreate();
+void OnUserUpdate();
+
+void make_btm_screen() {consoleSelect(&bottomScreen);}
+void printchar(char x, char y, char c) { printf("\x1b[%d;%dH%c", y, x, c); }
 
 //---------------------------------------------------------------------------------
 int main(void) {
@@ -140,5 +312,46 @@ int main(void) {
 
 
  
-
+/*int dx = x2 - x1;
+	int dy = y2 - y1;
+		
+	if (dx >= dy){
+		float y = 0.0f;
+		if(x1 < x2){
+			for (int x = x1; x <= x2; x++) {
+				y = y1 + dy * (x - x1) / dx;
+				plot_pixel(x, y, colour);
+			}
+		}else{
+			for (int x = x2; x <= x1; x++) {
+				y = y1 + dy * (x - x1) / dx;
+				plot_pixel(x, y, colour);
+			}
+		}
+	}else{
+		float x = 0.0f;
+		if(dx == 0){
+			if(y1 < y2){
+				for (int y = y1; y <= y2; y++) {
+					plot_pixel(x1, y, colour);
+				}
+			}else{
+				for (int y = y2; y <= y1; y++) {
+					plot_pixel(x2, y, colour);
+				}
+			}
+		}else{
+			if(y1 < y2){
+				for (int y = y1; y <= y2; y++) {
+					x = x1 + dx * (y - y1) / dy;
+					plot_pixel(x, y, colour);
+				}
+			}else{
+				for (int y = y2; y <= y1; y++) {
+					x = x1 + dx * (y - y1) / dy;
+					plot_pixel(x, y, colour);
+				}
+			}
+		}
+	}*/
 #endif
