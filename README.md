@@ -10,4 +10,7 @@ It's quite inefficient, but who needs backgrounds and sprites when you can have 
 
 This repo will also have examples of programs written based off it.
 
-The platform game contains sprites from New Super Mario Bros. for the Nintendo DS.
+The platform game contains sprites from New Super Mario Bros. for the Nintendo DS. I won't provide them here for legal reasons.
+The 3D engine doesn't contain any other things.
+
+You need devkitPro (namely devkitARM) to build.
