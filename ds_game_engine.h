@@ -4,6 +4,10 @@
 #define WHITE 0xFFFF
 #define BLACK 0x0000
 #define SKY 0xEEEF
+#define BLUE 0xFC00
+#define MAGENTA 0xFC1F
+#define CYAN 0xFFE0
+
 
 #include <nds.h>
 
