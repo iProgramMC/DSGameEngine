@@ -3,7 +3,7 @@
 	Simple console print demo which prints to bottom screen
 	and also has a frame buffer for the top screen to which
 	you can draw stuff
-	-- iProgramMC - Graphics Engine
+	-- iProgramInCpp - Graphics Engine
 	-- dovoto - Console bottom screen print
 
 ---------------------------------------------------------------------------------*/
@@ -125,7 +125,7 @@ void OnUserCreate()
 	decompress(usedblockBitmap, &usedblock_image,  LZ77);
 	decompress(mariostillBitmap, &mariostill_image,  LZ77);
 	decompress(mariojumpBitmap, &mariojump_image,  LZ77);
-	iprintf("\n\n\tGraphics Engine\n\tCoded by iProgramMC\n\tMore modern-like\n\tDo whatever you want!");
+	iprintf("\n\n\tGraphics Engine\n\tCoded by iProgramInCpp\n\tMore modern-like\n\tDo whatever you want!");
 }
 
 void OnUserUpdate()
