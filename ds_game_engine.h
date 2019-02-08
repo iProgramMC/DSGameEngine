@@ -135,6 +135,7 @@ void draw_triangle (int x1, int y1, int x2, int y2, int x3, int y3, short colour
 }
 
 void fill_triangle (int x1, int y1, int x2, int y2, int x3, int y3, short col){
+	/* Ripped from OneLoneCoder/ConsoleGameEngine */
 	int x, y, dx, dy, dx1, dy1, px, py, xe, ye, i;
 		dx = x2 - x1; dy = y2 - y1;
 		dx1 = abs(dx); dy1 = abs(dy);
